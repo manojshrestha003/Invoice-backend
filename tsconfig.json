@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",          // Source files
+    "outDir": "./dist",          // Compiled JS output
+
+    // Environment Settings
+    "module": "CommonJS",        // Node.js standard
+    "target": "ES2020",          // Modern JS
+    "lib": ["ES2020"],           // JS features support
+    "types": ["node"],           // Node types for TS
+
+    // Output Options
+    "sourceMap": true,           // For debugging
+    "declaration": true,         // Generate .d.ts files
+    "declarationMap": true,      // Map for .d.ts
+
+    // Strict Type Checking
+    "strict": true,                     
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    // Module & Import Handling
+    "esModuleInterop": true,        // Allows default imports from commonjs
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "dist", "prisma.config.ts"]
+}
