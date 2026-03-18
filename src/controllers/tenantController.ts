@@ -25,3 +25,31 @@ export const getTenants = async (_req: Request, res: Response) => {
         return res.status(500).json({ error: "Error fetching tenants", message: error.message });
     }
 }
+
+//update 
+export const updateTenant = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { name, plan } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ error: "Missing tenant ID" });
+        }
+
+        if (!name && !plan) {
+            return res.status(400).json({ error: "Missing required field: name or plan" });
+        }
+
+        // Only include fields that are actually provided in the request body
+        const updateData: any = {};
+        if (name !== undefined) updateData.name = name;
+        if (plan !== undefined) updateData.plan = plan;
+
+        const tenant = await tenantService.updateTenant(id as string, updateData);
+        return res.json({ message: "Tenant updated successfully", tenant });
+    }
+    catch (error: any) {
+        console.error("Error updating tenant:", error);
+        return res.status(500).json({ error: "Error updating tenant", message: error.message });
+    }
+}
