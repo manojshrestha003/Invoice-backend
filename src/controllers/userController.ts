@@ -74,7 +74,8 @@ export const completeRegistration = async (req: Request, res: Response) => {
                     role: role || 'ADMIN',
                     tenantId: tenant.id,
                     avatar: avatarUrl,
-                    phone: phone
+                    phone: phone,
+                    isEmailVerified: true
                 }
             });
 
@@ -128,7 +129,8 @@ export const loginUser = async (req: Request, res: Response) => {
                 role: user.role,
                 tenantId: user.tenantId,
                 avatar: user.avatar,
-                phone: user.phone
+                phone: user.phone,
+                isEmailVerified: user.isEmailVerified
             }
         });
     } catch (error: any) {
@@ -185,7 +187,7 @@ export const findUserByEmail = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const { password, ...userWithoutPassword } = user;
+        const { password: _, ...userWithoutPassword } = user;
 
         return res.status(200).json({
             message: 'User found successfully',

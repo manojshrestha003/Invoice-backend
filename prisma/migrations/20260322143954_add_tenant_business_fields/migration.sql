@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE "Tenant" ADD COLUMN     "address" TEXT,
+ADD COLUMN     "businessEmail" TEXT,
+ADD COLUMN     "currency" TEXT NOT NULL DEFAULT 'USD',
+ADD COLUMN     "logo" TEXT,
+ADD COLUMN     "phone" TEXT,
+ADD COLUMN     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+ADD COLUMN     "taxId" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "website" TEXT;
