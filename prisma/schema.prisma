@@ -24,6 +24,7 @@ model Tenant {
 model User {
   id        String    @id @default(uuid())
   email     String    @unique
+  phone     String?   @unique
   avatar    String?
   password  String?
   name      String
@@ -44,4 +45,13 @@ model Invoice {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
+}
+
+model VerificationOTP {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otpHash   String   // Store hashed OTP for security
+  attempts  Int      @default(0) // Track failed attempts (max 5)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
