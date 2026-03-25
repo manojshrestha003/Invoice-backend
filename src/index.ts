@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import tenantRoutes from './routes/tenantRoutes';
 import authRoutes from './routes/authRoutes';
+import invoiceRoutes from './routes/invoiceRoutes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger';
 
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use('/api/v1', tenantRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Global Error Handler
