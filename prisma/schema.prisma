@@ -31,6 +31,7 @@ model Tenant {
 
   users           User[]
   invoices        Invoice[]
+  customers       Customer[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now()) @updatedAt
@@ -48,21 +49,18 @@ model User {
   tenantId  String?
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
   invoices  Invoice[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
   isEmailVerified  Boolean @default(false)
   createdAt DateTime  @default(now())
 }
 
 model Invoice {
   id              String        @id @default(uuid())
-  invoiceNumber   String        @unique // e.g., INV-2024-001
+  invoiceNumber   String        // Unique per tenant: [tenantId, invoiceNumber]
   issueDate       DateTime      @default(now())
   dueDate         DateTime?
   status          InvoiceStatus @default(PENDING)
-  
-  // Customer Info
-  customerName    String
-  customerEmail   String?
-  customerAddress String?
   
   // Financials (Calculated on server)
   subTotal        Decimal       @db.Decimal(10, 2)
@@ -75,11 +73,16 @@ model Invoice {
   tenant          Tenant        @relation(fields: [tenantId], references: [id])
   userId          String
   user            User          @relation(fields: [userId], references: [id])
+  customerId      String?
+  customer        Customer?     @relation(fields: [customerId], references: [id])
   items           InvoiceItem[]
+  payments        Payment[]
   
   notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@unique([tenantId, invoiceNumber])
 }
 
 model InvoiceItem {
@@ -98,6 +101,7 @@ model InvoiceItem {
 enum InvoiceStatus {
   DRAFT
   PENDING
+  PARTIALLY_PAID
   PAID
   OVERDUE
   CANCELLED
@@ -111,3 +115,57 @@ model VerificationOTP {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  invoices  Invoice[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  amount    Decimal  @db.Decimal(10, 2)
+  method    String  
+  paidAt    DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  isRead    Boolean  @default(false)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String  
+  entity    String  
+  entityId  String?  
+  changes   Json?    
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+

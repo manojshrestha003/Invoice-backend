@@ -11,14 +11,14 @@ export const verifyOtpSchema = Joi.object({
 
 export const registerSchema = Joi.object({
     name: Joi.string().min(2).max(50).required(),
-    email: Joi.string().email().optional(), // Allow email just in case
+    email: Joi.string().email().optional(),
     password: Joi.string().min(6).required(),
     role: Joi.string().valid('ADMIN', 'MANAGER', 'EMPLOYEE').default('EMPLOYEE'),
     tenantName: Joi.string().min(2).max(100).optional().allow(''),
     verificationToken: Joi.string().required(),
     avatar: Joi.string().optional(),
     phone: Joi.string().optional().allow('')
-}).unknown(); // .unknown() prevents "is not allowed" errors for extra fields
+}).unknown();
 
 export const loginSchema = Joi.object({
     email: Joi.string().email().required(),
