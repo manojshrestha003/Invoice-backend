@@ -1,11 +1,12 @@
 import prisma from "../config/database";
+import { Prisma } from "@prisma/client";
 
 export const recordPayment = async (data: { 
   invoiceId: string; 
   amount: number; 
   method: string; 
 }) => {
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // 1. Create the payment
     const payment = await tx.payment.create({
       data: {
@@ -25,7 +26,7 @@ export const recordPayment = async (data: {
       throw new Error("Invoice not found");
     }
 
-    const totalPaid = invoice.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalPaid = invoice.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
     const totalAmount = Number(invoice.totalAmount);
 
     let newStatus = invoice.status;
@@ -55,7 +56,7 @@ export const getPaymentsByInvoice = async (invoiceId: string) => {
 };
 
 export const deletePayment = async (id: string) => {
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const payment = await tx.payment.findUnique({ where: { id } });
     if (!payment) throw new Error("Payment not found");
 
@@ -71,7 +72,7 @@ export const deletePayment = async (id: string) => {
     });
 
     if (invoice) {
-        const totalPaid = invoice.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+        const totalPaid = invoice.payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
         const totalAmount = Number(invoice.totalAmount);
 
         let newStatus = "PENDING";

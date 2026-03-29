@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/userServices';
 import prisma from '../config/database';
+import { Prisma } from '@prisma/client';
 
 import * as otpService from '../services/otpService';
 import * as emailService from '../services/emailServices';
@@ -60,7 +61,7 @@ export const completeRegistration = async (req: Request, res: Response) => {
 
         const avatarUrl = (req as any).file?.path;
 
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const tenant = await tx.tenant.create({
                 data: { name: tenantName || `${name}'s Workspace` }
             });
