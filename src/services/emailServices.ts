@@ -5,14 +5,20 @@ import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
+    service: "gmail",
     host: 'smtp.gmail.com',
-    port: 587,       // Use 465 for secure, or 587 for TLS
-    secure: false,    // true for 465, false for other ports
+    port: 465,
+    secure: true,
     auth: {
         user: process.env["EMAIL_USER"],
         pass: process.env["EMAIL_PASS"],
     },
-});
+    // Force IPv4 specifically for the SMTP connection
+    tls: {
+        rejectUnauthorized: false
+    },
+    family: 4
+} as any);
 
 export const sendOTPEmail = async (email: string, otp: string) => {
     const mailOptions = {
