@@ -1,4 +1,8 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// Tell Node.js to prioritize IPv4 over IPv6 to fix Render ENETUNREACH errors
+dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
