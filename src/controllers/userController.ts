@@ -7,8 +7,12 @@ import * as otpService from '../services/otpService';
 import * as emailService from '../services/emailServices';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 
 const REGISTRATION_TOKEN_SECRET = process.env['JWT_SECRET'] || 'temp_secret';
+const GOOGLE_CLIENT_ID = process.env['GOOGLE_CLIENT_ID'] || '';
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+
 
 export const requestRegistrationOTP = async (req: Request, res: Response) => {
     try {
@@ -198,5 +202,71 @@ export const findUserByEmail = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Find User Error:', error);
         return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+
+export const googleLogin = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body;
+        // 1. Verify the token with Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: GOOGLE_CLIENT_ID,
+        });
+        // Extract the user details Google returns securely
+        const payload = ticket.getPayload();
+        if (!payload || !payload.email) {
+            return res.status(400).json({ message: 'Invalid Google token payload' });
+        }
+        const { email, name, picture } = payload;
+        // 2. Check if user already exists
+        let user = await userService.findUserByEmail(email);
+        // 3. If User doesn't exist, we auto-register them
+        if (!user) {
+            // Auto register them like in `completeRegistration`, generating a Tenant
+            const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const tenant = await tx.tenant.create({
+                    data: { name: `${name}'s Workspace` }
+                });
+                const newUser = await tx.user.create({
+                    data: {
+                        name: name as string,
+                        email: email,
+                        // Null password because they are authenticating via Google
+                        password: null,
+                        role: 'ADMIN',
+                        tenantId: tenant.id,
+                        avatar: picture || null,
+                        isEmailVerified: true
+                    }
+                });
+                return newUser;
+            });
+            user = result;
+        }
+        // 4. Issue standard JWT token exactly like the normal login logic
+        const jwtToken = jwt.sign(
+            { id: user.id, email: user.email, role: user.role, tenantId: user.tenantId },
+            REGISTRATION_TOKEN_SECRET,
+            { expiresIn: '1d' }
+        );
+        return res.status(200).json({
+            message: 'Google login successful',
+            token: jwtToken,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                tenantId: user.tenantId,
+                avatar: user.avatar,
+                phone: user.phone,
+                isEmailVerified: user.isEmailVerified
+            }
+        });
+    } catch (error: any) {
+        console.error('Google Login Error:', error);
+        return res.status(500).json({ message: 'Google Authentication failed. Please try again.' });
     }
 };

@@ -3,7 +3,7 @@ import * as userController from '../controllers/userController';
 import { validate } from '../middlewares/validationMiddleware';
 import { upload } from '../config/cloudinary';
 import { authenticate } from '../middlewares/authMiddleware';
-import { requestOtpSchema, verifyOtpSchema, registerSchema, loginSchema } from '../validations/authValidation';
+import { requestOtpSchema, verifyOtpSchema, registerSchema, loginSchema, googleLoginSchema } from '../validations/authValidation';
 
 const router = Router();
 
@@ -182,5 +182,26 @@ router.get('/findUserByEmail', userController.findUserByEmail);
  *         description: Unauthorized
  */
 router.patch('/updateUser', authenticate, upload.single('avatar'), userController.updateUser);
+
+/**
+ * @openapi
+ * /auth/google:
+ *   post:
+ *     summary: Login or Register with Google OAuth
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ */
+router.post('/google', validate(googleLoginSchema), userController.googleLogin);
 
 export default router;
